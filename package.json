@@ -1,0 +1,28 @@
+{
+  "name": "cathoderaystats",
+  "version": "1.0.0",
+  "description": "CathodeRayStats - Animated retro CRT television SVG widget displaying live GitHub statistics for profile READMEs",
+  "main": "dist/generate.js",
+  "scripts": {
+    "build": "esbuild src/generate.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/generate.js",
+    "preview": "tsx preview/generate-preview.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "github-action",
+    "profile",
+    "crt",
+    "retro-tv",
+    "svg",
+    "pixel-art",
+    "stats"
+  ],
+  "author": "Cheese-Cheese",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

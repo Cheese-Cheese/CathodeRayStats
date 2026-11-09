@@ -1,0 +1,109 @@
+name: 'CathodeRayStats'
+author: 'Cheese-Cheese'
+description: 'CathodeRayStats - Animated retro CRT television SVG displaying live GitHub stats, languages, top repo, and activity.'
+branding:
+  icon: 'tv'
+  color: 'gray-dark'
+
+inputs:
+  username:
+    description: 'GitHub username to fetch stats for'
+    required: true
+    default: ${{ github.repository_owner }}
+  tv-color:
+    description: 'TV cabinet preset (charcoal, walnut, beige, mustard, crimson, navy) or custom #RRGGBB hex'
+    required: false
+    default: 'charcoal'
+  screen-color:
+    description: 'CRT phosphor preset (white, yellow, amber, green, cyan, magenta, orange) or custom #RRGGBB hex'
+    required: false
+    default: 'white'
+  tv-style:
+    description: 'TV chassis style: classic (rounded retro) or trinitron (boxy monitor)'
+    required: false
+    default: 'classic'
+  show-antennas:
+    description: 'Show retro rabbit-ear antennas on top of the TV (true/false)'
+    required: false
+    default: 'false'
+  featured-repo:
+    description: 'Optional repository name (e.g. "my-project") to spotlight on Channel 03'
+    required: false
+    default: ''
+  channel-duration:
+    description: 'Seconds to display each channel before switching (default: 4)'
+    required: false
+    default: '4'
+  channel:
+    description: 'Active channel: all (cycles all 4 channels) or freeze on 1, 2, 3, or 4'
+    required: false
+    default: 'all'
+  badge-label:
+    description: 'Custom text for the bottom chassis badge (defaults to @USERNAME)'
+    required: false
+    default: ''
+  knob-type:
+    description: 'Rotary knob indicator style: line (radial tick mark) or dot (retro glowing indicator dot)'
+    required: false
+    default: 'line'
+  output-path:
+    description: 'File path where the generated SVG will be written'
+    required: false
+    default: 'dist/retro-tv.svg'
+  timezone-offset-minutes:
+    description: 'UTC offset in minutes (e.g. "330" for IST)'
+    required: false
+    default: '0'
+  github-token:
+    description: 'GitHub token for GraphQL contribution calendar access'
+    required: false
+    default: ${{ github.token }}
+  commit-and-push:
+    description: 'Automatically commit and push the updated SVG back to the repo (true/false)'
+    required: false
+    default: 'true'
+  commit-message:
+    description: 'Commit message when pushing the updated SVG'
+    required: false
+    default: 'chore: update CathodeRayStats [skip ci]'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Generate Retro TV SVG
+      shell: bash
+      env:
+        INPUT_USERNAME: ${{ inputs.username }}
+        INPUT_TV_COLOR: ${{ inputs.tv-color }}
+        INPUT_SCREEN_COLOR: ${{ inputs.screen-color }}
+        INPUT_TV_STYLE: ${{ inputs.tv-style }}
+        INPUT_SHOW_ANTENNAS: ${{ inputs.show-antennas }}
+        INPUT_FEATURED_REPO: ${{ inputs.featured-repo }}
+        INPUT_CHANNEL_DURATION: ${{ inputs.channel-duration }}
+        INPUT_CHANNEL: ${{ inputs.channel }}
+        INPUT_BADGE_LABEL: ${{ inputs.badge-label }}
+        INPUT_KNOB_TYPE: ${{ inputs.knob-type }}
+        INPUT_OUTPUT_PATH: ${{ inputs.output-path }}
+        INPUT_TIMEZONE_OFFSET: ${{ inputs.timezone-offset-minutes }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        node "${{ github.action_path }}/dist/generate.js"
+
+    - name: Commit and Push Updated SVG
+      if: ${{ inputs.commit-and-push == 'true' }}
+      shell: bash
+      run: |
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add "${{ inputs.output-path }}"
+        if git diff --staged --quiet; then
+          echo "No changes to CathodeRayStats SVG."
+        else
+          git commit -m "${{ inputs.commit-message }}"
+          git push
+        fi
